@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "737278449708",
+    "firebase_url": "https://esp32-smart-home-5643e-default-rtdb.firebaseio.com",
+    "project_id": "esp32-smart-home-5643e",
+    "storage_bucket": "esp32-smart-home-5643e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737278449708:android:7c4e24edcbd7bfcae95989",
+        "android_client_info": {
+          "package_name": "com.example.esp_home"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuLjkcfM81SGZnlxuH1wRJ55Sfem1J6pk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
