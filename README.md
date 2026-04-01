@@ -2,6 +2,10 @@
 
 A new Flutter project.
 
+## Structure
+
+Home screen UI and logic are split under `lib/home/` for easier maintenance.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
