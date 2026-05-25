@@ -318,9 +318,17 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ],
                             ),
-                            child: const CircleAvatar(
-                              backgroundColor: Colors.transparent,
-                              child: Icon(Icons.add, color: Colors.black),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {},
+                                customBorder: const CircleBorder(),
+                                splashColor: Colors.black.withOpacity(0.2),
+                                child: const CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  child: Icon(Icons.add, color: Colors.black),
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -340,11 +348,12 @@ class _HomePageState extends State<HomePage> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              tabButton('Favorites', Icons.favorite, selected: true),
+                              tabButton('Favorites', Icons.favorite,
+                                  selected: true, onTap: () {}),
                               const SizedBox(width: 12),
-                              tabButton('Grid', Icons.grid_view),
+                              tabButton('Grid', Icons.grid_view, onTap: () {}),
                               const SizedBox(width: 12),
-                              tabButton('Lights', Icons.lightbulb),
+                              tabButton('Lights', Icons.lightbulb, onTap: () {}),
                             ],
                           ),
                         ),
@@ -371,31 +380,43 @@ class _HomePageState extends State<HomePage> {
                               return SizedBox(
                                 height: 80,
                                 width: 180,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    if (_controller.editMode) {
-                                      _editDeviceName(key);
-                                      return;
-                                    }
-                                    _controller.toggleRelay(key, !isOn);
-                                  },
-                                  onLongPress: () {
-                                    _controller.toggleSensorForRelay(key);
-                                  },
-                                  child: Stack(
-                                    children: [
-                                      SizedBox.expand(
-                                        child: DeviceCard(
-                                          name: name,
-                                          status: status,
-                                          isOn: isOn,
-                                          isSensorControlled: isSensorControlled,
+                                child: Stack(
+                                  children: [
+                                    DeviceCard(
+                                      name: name,
+                                      status: status,
+                                      isOn: isOn,
+                                      isSensorControlled: isSensorControlled,
+                                    ),
+                                    Positioned.fill(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        borderRadius: BorderRadius.circular(22),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: InkWell(
+                                          splashColor: _primary.withOpacity(0.3),
+                                          highlightColor: _primary.withOpacity(0.1),
+                                          focusColor: _primary.withOpacity(0.2),
+                                          hoverColor: _primary.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(22),
+                                          onTap: () {
+                                            if (_controller.editMode) {
+                                              _editDeviceName(key);
+                                              return;
+                                            }
+                                            _controller.toggleRelay(key, !isOn);
+                                          },
+                                          onLongPress: () {
+                                            _controller.toggleSensorForRelay(key);
+                                          },
                                         ),
                                       ),
-                                      if (_controller.editMode)
-                                        Positioned(
-                                          top: 4,
-                                          right: 4,
+                                    ),
+                                    if (_controller.editMode)
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: IgnorePointer(
                                           child: Container(
                                             decoration: BoxDecoration(
                                               color: Colors.black54,
@@ -410,8 +431,8 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                           ),
                                         ),
-                                    ],
-                                  ),
+                                      ),
+                                  ],
                                 ),
                               );
                             }),
@@ -426,12 +447,13 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.symmetric(vertical: 12.0,horizontal: 8),
                         child: Row(
                           children: [
+
                             bottomButton(
-                              _controller.editMode ? 'Done' : 'Edit',
-                              Icons.edit,
-                              onTap: () =>
-                                  _controller.setEditMode(!_controller.editMode),
+                              'TIMEOUT (${_controller.formatTimeoutLabel(_controller.timeoutSec)})',
+                              Icons.timer,
+                              onTap: _showTimeoutPicker,
                             ),
+
                             const SizedBox(width: 5),
                             bottomButton(
                               'ALL ON',
@@ -444,12 +466,14 @@ class _HomePageState extends State<HomePage> {
                               Icons.power_off,
                               onTap: () => _controller.toggleAll(false),
                             ),
-                            const SizedBox(width: 5),
-                            bottomButton(
-                              'TIMEOUT (${_controller.formatTimeoutLabel(_controller.timeoutSec)})',
-                              Icons.timer,
-                              onTap: _showTimeoutPicker,
+                            const SizedBox(width: 5),bottomButton(
+                              _controller.editMode ? 'Done' : 'Edit',
+                              Icons.edit,
+                              onTap: () =>
+                                  _controller.setEditMode(!_controller.editMode),
                             ),
+
+
                           ],
                         ),
                       ),
