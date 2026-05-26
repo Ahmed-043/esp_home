@@ -15,6 +15,8 @@ class HomeController extends ChangeNotifier {
   bool editMode = false;
   bool loading = true;
   bool _initialized = false;
+  bool _isActive = true;
+  Completer<void>? _initialLoadCompleter;
 
   bool get isInitialized => _initialized;
 
@@ -46,28 +48,50 @@ class HomeController extends ChangeNotifier {
     if (_isDesktop) {
       // Desktop: Polling via REST API
       await fetchDevicesFromDatabase();
-      _refreshTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
-        fetchDevicesFromDatabase(isSilent: true);
-      });
+      _startDesktopPolling();
     } else {
       // Mobile/Web: Real-time via SDK
       _startListeningSDK();
+      await _waitForInitialLoad();
     }
   }
 
   void _startListeningSDK() {
+    _subscription?.cancel();
+    _initialLoadCompleter ??= Completer<void>();
     _subscription = _dbRef.onValue.listen((event) {
       final data = event.snapshot.value;
       if (data is Map) {
         _processDatabaseData(data);
       }
       loading = false;
+      if (!(_initialLoadCompleter?.isCompleted ?? true)) {
+        _initialLoadCompleter?.complete();
+      }
       notifyListeners();
     }, onError: (error) {
       debugPrint("Firebase SDK Error: $error");
       loading = false;
+      if (!(_initialLoadCompleter?.isCompleted ?? true)) {
+        _initialLoadCompleter?.complete();
+      }
       notifyListeners();
     });
+  }
+
+  void _startDesktopPolling() {
+    _refreshTimer?.cancel();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (!_isActive) return;
+      fetchDevicesFromDatabase(isSilent: true);
+    });
+  }
+
+  Future<void> _waitForInitialLoad() async {
+    final completer = _initialLoadCompleter;
+    if (completer != null && !completer.isCompleted) {
+      await completer.future;
+    }
   }
 
   void _processDatabaseData(Map data) {
@@ -254,6 +278,25 @@ class HomeController extends ChangeNotifier {
         .replaceAll(' ', '');
     if (cleaned.isEmpty) return {};
     return cleaned.split(',').where((e) => e.trim().isNotEmpty).toSet();
+  }
+
+  void pauseNonEssentialWork() {
+    if (!_initialized || !_isActive) return;
+    _isActive = false;
+    _refreshTimer?.cancel();
+    _subscription?.cancel();
+    _subscription = null;
+  }
+
+  Future<void> resumeNonEssentialWork() async {
+    if (!_initialized || _isActive) return;
+    _isActive = true;
+    if (_isDesktop) {
+      await fetchDevicesFromDatabase(isSilent: true);
+      _startDesktopPolling();
+      return;
+    }
+    _startListeningSDK();
   }
 
   @override

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="Relay"
+        android:textColor="#E5F4FF"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_primary_action"
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/widget_primary_button"
+        android:gravity="center"
+        android:text="ON/OFF"
+        android:textColor="#052D33"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_alt_action"
+        android:layout_width="match_parent"
+        android:layout_height="28dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/widget_secondary_button"
+        android:gravity="center"
+        android:text="ALT"
+        android:textColor="#D9F8FF"
+        android:textSize="11sp"
+        android:textStyle="bold" />
+</LinearLayout>

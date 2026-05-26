@@ -6,18 +6,25 @@ import 'home/home_controller.dart';
 import 'home/home_page.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key, this.controller, this.preload = true, this.autoNavigate = true});
+  const SplashScreen({
+    super.key,
+    this.controller,
+    this.preload = true,
+    this.autoNavigate = true,
+    this.openTimeoutOnLaunch = false,
+  });
 
   final HomeController? controller;
   final bool preload;
   final bool autoNavigate;
+  final bool openTimeoutOnLaunch;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _controller;
   late final Animation<double> _pulse;
   Timer? _navTimer;
@@ -25,6 +32,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -35,6 +43,17 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (widget.autoNavigate) {
       _preloadAndGo();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      _controller.stop();
+      return;
+    }
+    if (state == AppLifecycleState.resumed) {
+      _controller.repeat(reverse: true);
     }
   }
 
@@ -56,7 +75,11 @@ class _SplashScreenState extends State<SplashScreen>
         transitionDuration: const Duration(milliseconds: 450),
         pageBuilder: (_, animation, __) => FadeTransition(
           opacity: animation,
-          child: HomePage(controller: controller, initController: false),
+          child: HomePage(
+            controller: controller,
+            initController: false,
+            openTimeoutPickerOnStart: widget.openTimeoutOnLaunch,
+          ),
         ),
       ),
     );
@@ -64,6 +87,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _navTimer?.cancel();
     _controller.dispose();
     super.dispose();
