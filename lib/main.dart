@@ -1,8 +1,10 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'firebase_options.dart';
+import 'package:flutter/services.dart';
+
 import 'splash_screen.dart';
+
+const MethodChannel _widgetChannel = MethodChannel('esp_home/widget_actions');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,20 +15,31 @@ void main() async {
        defaultTargetPlatform == TargetPlatform.linux ||
        defaultTargetPlatform == TargetPlatform.macOS);
 
-  if (!isDesktop) {
+  String? initialWidgetAction;
+  if (!isDesktop && defaultTargetPlatform == TargetPlatform.android) {
+    try {
+      initialWidgetAction =
+          await _widgetChannel.invokeMethod<String>('consumeInitialAction');
+    } catch (_) {
+      initialWidgetAction = null;
+    }
   }
 
-  runApp(const MyApp());
+  runApp(MyApp(initialWidgetAction: initialWidgetAction));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.initialWidgetAction});
+
+  final String? initialWidgetAction;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+      home: SplashScreen(
+        openTimeoutOnLaunch: initialWidgetAction == 'open_timeout',
+      ),
       theme: ThemeData.dark(),
     );
   }

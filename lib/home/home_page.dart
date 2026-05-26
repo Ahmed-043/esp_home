@@ -11,29 +11,62 @@ const _bgStart = Color(0xFF0F172A);
 const _bgEnd = Color(0xFF111827);
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, this.controller, this.initController = true});
+  const HomePage({
+    super.key,
+    this.controller,
+    this.initController = true,
+    this.openTimeoutPickerOnStart = false,
+  });
 
   final HomeController? controller;
   final bool initController;
+  final bool openTimeoutPickerOnStart;
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late final HomeController _controller;
+  bool _openedTimeoutOnStart = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller = widget.controller ?? HomeController();
     if (widget.initController && !_controller.isInitialized) {
       _controller.init();
+    }
+    if (widget.openTimeoutPickerOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openTimeoutPickerOnStartIfNeeded();
+      });
+    }
+  }
+
+  void _openTimeoutPickerOnStartIfNeeded() {
+    if (!mounted || _openedTimeoutOnStart || !widget.openTimeoutPickerOnStart) {
+      return;
+    }
+    _openedTimeoutOnStart = true;
+    _showTimeoutPicker();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      _controller.pauseNonEssentialWork();
+      return;
+    }
+    if (state == AppLifecycleState.resumed) {
+      _controller.resumeNonEssentialWork();
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
   }
@@ -226,26 +259,6 @@ class _HomePageState extends State<HomePage> {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        if (_controller.loading) {
-          return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [_bgStart, _bgEnd],
-                ),
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(_primary),
-                ),
-              ),
-            ),
-          );
-        }
-
         final devices = _controller.relayStatus.keys.map((key) {
           return {
             'key': key,
@@ -440,6 +453,16 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
+                    if (_controller.loading && devices.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Center(
+                          child: Text(
+                            'Loading devices…',
+                            style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: 10),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -502,4 +525,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
