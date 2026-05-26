@@ -14,6 +14,9 @@ void main() async {
        defaultTargetPlatform == TargetPlatform.macOS);
 
   if (!isDesktop) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   }
 
   runApp(const MyApp());
