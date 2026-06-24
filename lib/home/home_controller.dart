@@ -25,8 +25,8 @@ class HomeController extends ChangeNotifier {
 
   // Mobile/Web specific (SDK)
   StreamSubscription<DatabaseEvent>? _subscription;
-  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
-
+  //final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
+  DatabaseReference get _dbRef => FirebaseDatabase.instance.ref();
   // holds which relays are controlled by sensors (e.g. {"relay2","relay4"})
   Set<String> sensorsSet = {};
 
